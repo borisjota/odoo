@@ -42,6 +42,7 @@ class TestDiscussFullPerformance(TransactionCase):
             'user_id': user.id,
         } for user in self.users])
         self.leave_type = self.env['hr.leave.type'].create({
+            'leave_validation_type': 'no_validation',
             'requires_allocation': 'no',
             'name': 'Legal Leaves',
             'time_type': 'leave',
@@ -58,7 +59,7 @@ class TestDiscussFullPerformance(TransactionCase):
     def test_init_messaging(self):
         """Test performance of `_init_messaging`."""
         channel_general = self.env.ref('mail.channel_all_employees')  # Unfortunately #general cannot be deleted. Assertions below assume data from a fresh db with demo.
-        self.env['mail.channel'].search([('id', '!=', channel_general.id)]).unlink()
+        self.env['mail.channel'].sudo().search([('id', '!=', channel_general.id)]).unlink()
         user_root = self.env.ref('base.user_root')
         # create public channels
         channel_channel_public_1 = self.env['mail.channel'].browse(self.env['mail.channel'].channel_create(name='public 1', privacy='public')['id'])
@@ -99,7 +100,7 @@ class TestDiscussFullPerformance(TransactionCase):
         self.maxDiff = None
         self.users[0].flush()
         self.users[0].invalidate_cache()
-        with self.assertQueryCount(emp=98):
+        with self.assertQueryCount(emp=93):  # ent: 89
             init_messaging = self.users[0].with_user(self.users[0])._init_messaging()
 
         self.assertEqual(init_messaging, {
@@ -289,6 +290,7 @@ class TestDiscussFullPerformance(TransactionCase):
                     'defaultDisplayMode': False,
                     'description': False,
                     'group_based_subscription': False,
+                    'guestMembers': [('insert', [])],
                     'id': channel_group_1.id,
                     'invitedGuests': [('insert', [])],
                     'invitedPartners': [('insert', [])],
@@ -352,6 +354,7 @@ class TestDiscussFullPerformance(TransactionCase):
                     'defaultDisplayMode': False,
                     'description': False,
                     'group_based_subscription': False,
+                    'guestMembers': [('insert', [])],
                     'id': channel_chat_1.id,
                     'invitedGuests': [('insert', [])],
                     'invitedPartners': [('insert', [])],
@@ -415,6 +418,7 @@ class TestDiscussFullPerformance(TransactionCase):
                     'defaultDisplayMode': False,
                     'description': False,
                     'group_based_subscription': False,
+                    'guestMembers': [('insert', [])],
                     'id': channel_chat_2.id,
                     'invitedGuests': [('insert', [])],
                     'invitedPartners': [('insert', [])],
@@ -478,6 +482,7 @@ class TestDiscussFullPerformance(TransactionCase):
                     'defaultDisplayMode': False,
                     'description': False,
                     'group_based_subscription': False,
+                    'guestMembers': [('insert', [])],
                     'id': channel_chat_3.id,
                     'invitedGuests': [('insert', [])],
                     'invitedPartners': [('insert', [])],
@@ -541,6 +546,7 @@ class TestDiscussFullPerformance(TransactionCase):
                     'defaultDisplayMode': False,
                     'description': False,
                     'group_based_subscription': False,
+                    'guestMembers': [('insert', [])],
                     'id': channel_chat_4.id,
                     'invitedGuests': [('insert', [])],
                     'invitedPartners': [('insert', [])],
@@ -604,6 +610,7 @@ class TestDiscussFullPerformance(TransactionCase):
                     'defaultDisplayMode': False,
                     'description': False,
                     'group_based_subscription': False,
+                    'guestMembers': [('insert', [])],
                     'id': channel_livechat_1.id,
                     'invitedGuests': [('insert', [])],
                     'invitedPartners': [('insert', [])],
@@ -667,6 +674,7 @@ class TestDiscussFullPerformance(TransactionCase):
                     'defaultDisplayMode': False,
                     'description': False,
                     'group_based_subscription': False,
+                    'guestMembers': [('insert', [])],
                     'id': channel_livechat_2.id,
                     'invitedGuests': [('insert', [])],
                     'invitedPartners': [('insert', [])],

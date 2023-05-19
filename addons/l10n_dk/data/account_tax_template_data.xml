@@ -83,12 +83,20 @@
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('l10n_dk.account_tax_report_line_section_b_product_eu')],
             }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('l10n_dk.account_tax_report_line_section_b_product_eu')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
             }),
         ]"/>
     </record>
@@ -105,12 +113,20 @@
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('l10n_dk.account_tax_report_line_section_b_services')],
             }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('l10n_dk.account_tax_report_line_section_b_services')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
             }),
         ]"/>
     </record>
@@ -129,12 +145,20 @@
                 'repartition_type': 'base',
                 'plus_report_line_ids': [ref('l10n_dk.account_tax_report_line_section_c')],
             }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
                 'minus_report_line_ids': [ref('l10n_dk.account_tax_report_line_section_c')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
             }),
         ]"/>
     </record>
@@ -328,7 +352,7 @@
         <field name="sequence">450</field>
         <field name="name">Restaurationsmoms 6,25%, købsmoms</field>
         <field name="description">6,25%</field>
-        <field name="amount">6.25</field>
+        <field name="amount">25</field>
         <field name="amount_type">percent</field>
         <field name="type_tax_use">purchase</field>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
@@ -337,10 +361,14 @@
                 'repartition_type': 'base',
             }),
             (0,0, {
-                'factor_percent': 100,
+                'factor_percent': 25,
                 'repartition_type': 'tax',
                 'account_id': ref('a8740'),
                 'plus_report_line_ids': [ref('l10n_dk.account_tax_report_line_deduction_purchase_tax')],
+            }),
+            (0,0, {
+                'factor_percent': 75,
+                'repartition_type': 'tax',
             }),
         ]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
@@ -349,10 +377,56 @@
                 'repartition_type': 'base',
             }),
             (0,0, {
-                'factor_percent': 100,
+                'factor_percent': 25,
                 'repartition_type': 'tax',
                 'account_id': ref('a8740'),
-                'minus_report_line_ids': [ref('l10n_dk.account_tax_report_line_deduction_purchase_tax')],
+                'plus_report_line_ids': [ref('l10n_dk.account_tax_report_line_deduction_purchase_tax')],
+            }),
+            (0,0, {
+                'factor_percent': 75,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+    </record>
+    <record id="tax460" model="account.tax.template">
+        <field name="chart_template_id" ref="dk_chart_template"/>
+        <field name="sequence">450</field>
+        <field name="name">Restaurationsmoms indeholdt 6,25%, købsmoms</field>
+        <field name="description">6,25%</field>
+        <field name="amount">25</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="price_include" eval="True"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 25,
+                'repartition_type': 'tax',
+                'account_id': ref('a8740'),
+                'plus_report_line_ids': [ref('l10n_dk.account_tax_report_line_deduction_purchase_tax')],
+            }),
+            (0,0, {
+                'factor_percent': 75,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 25,
+                'repartition_type': 'tax',
+                'account_id': ref('a8740'),
+                'plus_report_line_ids': [ref('l10n_dk.account_tax_report_line_deduction_purchase_tax')],
+            }),
+            (0,0, {
+                'factor_percent': 75,
+                'repartition_type': 'tax',
             }),
         ]"/>
     </record>
@@ -553,7 +627,8 @@
         <field name="sequence">710</field>
         <field name="name">Olie- og flaskegasafgift</field>
         <field name="amount">100</field>
-        <field name="amount_type">percent</field>
+        <field name="amount_type">division</field>
+        <field name="price_include" eval="True"/>
         <field name="type_tax_use">purchase</field>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
@@ -567,7 +642,7 @@
                 'plus_report_line_ids': [ref('l10n_dk.account_tax_report_line_deduction_oil_bottle_tax')],
             }),
             (0,0, {
-                'factor_percent': -92.83,
+                'factor_percent': 7.17,
                 'repartition_type': 'tax',
             }),
         ]"/>
@@ -583,7 +658,7 @@
                 'minus_report_line_ids': [ref('l10n_dk.account_tax_report_line_deduction_oil_bottle_tax')],
             }),
             (0,0, {
-                'factor_percent': -92.83,
+                'factor_percent': 7.17,
                 'repartition_type': 'tax',
             }),
         ]"/>
@@ -631,7 +706,8 @@
         <field name="sequence">730</field>
         <field name="name">Naturgas- og bygasafgift</field>
         <field name="amount">100</field>
-        <field name="amount_type">percent</field>
+        <field name="amount_type">division</field>
+        <field name="price_include" eval="True"/>
         <field name="type_tax_use">purchase</field>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
@@ -645,7 +721,7 @@
                 'plus_report_line_ids': [ref('l10n_dk.account_tax_report_line_deduction_gas_tax')],
             }),
             (0,0, {
-                'factor_percent': -92.83,
+                'factor_percent': 7.17,
                 'repartition_type': 'tax',
             }),
         ]"/>
@@ -661,7 +737,7 @@
                 'minus_report_line_ids': [ref('l10n_dk.account_tax_report_line_deduction_gas_tax')],
             }),
             (0,0, {
-                'factor_percent': -92.83,
+                'factor_percent': 7.17,
                 'repartition_type': 'tax',
             }),
         ]"/>

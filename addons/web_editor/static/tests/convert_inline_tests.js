@@ -2,11 +2,8 @@
 import convertInline from '@web_editor/js/backend/convert_inline';
 import {getGridHtml, getTableHtml, getRegularGridHtml, getRegularTableHtml} from 'web_editor.test_utils';
 
-
 QUnit.module('web_editor', {}, function () {
 QUnit.module('convert_inline', {}, function () {
-    let $editable;
-
     QUnit.module('Convert Bootstrap grids to tables');
     // Test bootstrapToTable, cardToTable and listGroupToTable
 
@@ -14,7 +11,7 @@ QUnit.module('convert_inline', {}, function () {
         assert.expect(4);
 
         // 1x1
-        $editable = $(`<div>${getRegularGridHtml(1, 1)}</div>`);
+        let $editable = $(`<div>${getRegularGridHtml(1, 1)}</div>`);
         convertInline.bootstrapToTable($editable);
         assert.strictEqual($editable.html(), getRegularTableHtml(1, 1, 12, 100),
             "should have converted a 1x1 grid to an equivalent table");
@@ -41,11 +38,12 @@ QUnit.module('convert_inline', {}, function () {
         assert.expect(4);
 
         // 1x13
-        $editable = $(`<div>${getRegularGridHtml(1, 13)}</div>`);
+        let $editable = $(`<div>${getRegularGridHtml(1, 13)}</div>`);
         convertInline.bootstrapToTable($editable);
         assert.strictEqual($editable.html(),
             getRegularTableHtml(1, 12, 1, 8.33).slice(0, -8) +
-                `<tr><td colspan="12" width="100%" style="width: 100%;">(0, 12)</td></tr></table>`,
+                `<tr><td colspan="1" width="8.33%" style="width: 8.33%;">(0, 12)</td>` +
+                `<td colspan="11" width="91.67%" style="width: 91.67%;"></td></tr></table>`,
             "should have converted a 1x13 grid to an equivalent table (overflowing)");
 
         // 1x14
@@ -54,7 +52,8 @@ QUnit.module('convert_inline', {}, function () {
         assert.strictEqual($editable.html(),
             getRegularTableHtml(1, 12, 1, 8.33).slice(0, -8) +
                 `<tr><td colspan="1" width="8.33%" style="width: 8.33%;">(0, 12)</td>` +
-                `<td colspan="11" width="91.67%" style="width: 91.67%;">(0, 13)</td></tr></table>`,
+                `<td colspan="1" width="8.33%" style="width: 8.33%;">(0, 13)</td>` +
+                `<td colspan="10" width="83.33%" style="width: 83.33%;"></td></tr></table>`,
             "should have converted a 1x14 grid to an equivalent table (overflowing)");
 
         // 1x25
@@ -64,7 +63,8 @@ QUnit.module('convert_inline', {}, function () {
             getRegularTableHtml(1, 12, 1, 8.33).slice(0, -8) +
             getRegularTableHtml(1, 12, 1, 8.33).replace(/\(0, (\d+)\)/g, (s, c) => `(0, ${+c + 12})`)
                 .replace(/^<table[^<]*>/, '').slice(0, -8) +
-                `<tr><td colspan="12" width="100%" style="width: 100%;">(0, 24)</td></tr></table>`,
+                `<tr><td colspan="1" width="8.33%" style="width: 8.33%;">(0, 24)</td>` +
+                `<td colspan="11" width="91.67%" style="width: 91.67%;"></td></tr></table>`,
             "should have converted a 1x25 grid to an equivalent table (overflowing)");
 
         // 1x26
@@ -75,14 +75,15 @@ QUnit.module('convert_inline', {}, function () {
             getRegularTableHtml(1, 12, 1, 8.33).replace(/\(0, (\d+)\)/g, (s, c) => `(0, ${+c + 12})`)
                 .replace(/^<table[^<]*>/, '').slice(0, -8) +
                 `<tr><td colspan="1" width="8.33%" style="width: 8.33%;">(0, 24)</td>` +
-                `<td colspan="11" width="91.67%" style="width: 91.67%;">(0, 25)</td></tr></table>`,
+                `<td colspan="1" width="8.33%" style="width: 8.33%;">(0, 25)</td>` +
+                `<td colspan="10" width="83.33%" style="width: 83.33%;"></td></tr></table>`,
             "should have converted a 1x26 grid to an equivalent table (overflowing)");
     });
     QUnit.test('convert a multi-row regular grid', async function (assert) {
         assert.expect(4);
 
         // 2x1
-        $editable = $(`<div>${getRegularGridHtml(2, 1)}</div>`);
+        let $editable = $(`<div>${getRegularGridHtml(2, 1)}</div>`);
         convertInline.bootstrapToTable($editable);
         assert.strictEqual($editable.html(), getRegularTableHtml(2, 1, 12, 100),
             "should have converted a 2x1 grid to an equivalent table");
@@ -109,12 +110,13 @@ QUnit.module('convert_inline', {}, function () {
         assert.expect(4);
 
         // 2x[13,1]
-        $editable = $(`<div>${getRegularGridHtml(2, [13, 1])}</div>`);
+        let $editable = $(`<div>${getRegularGridHtml(2, [13, 1])}</div>`);
         convertInline.bootstrapToTable($editable);
         assert.strictEqual($editable.html(),
             getRegularTableHtml(1, 12, 1, 8.33).slice(0, -8) +
-                `<tr><td colspan="12" width="100%" style="width: 100%;">(0, 12)</td></tr>` +
-                `<tr><td colspan="12" width="100%" style="width: 100%;">(1, 0)</td></tr></table>`,
+                `<tr><td colspan="1" width="8.33%" style="width: 8.33%;">(0, 12)</td>` +
+                `<td colspan="11" width="91.67%" style="width: 91.67%;"></td></tr>` + // 13 overflowed the row by 1 -> fill up
+                `<tr><td colspan="12" width="100%" style="width: 100%;">(1, 0)</td></tr></table>`, // 1 col with no size == col-12
             "should have converted a 2x[13,1] grid to an equivalent table (overflowing)");
 
         // 2x[1,13]
@@ -122,7 +124,8 @@ QUnit.module('convert_inline', {}, function () {
         convertInline.bootstrapToTable($editable);
         assert.strictEqual($editable.html(),
             getRegularTableHtml(2, [1, 12], [12, 1], [100, 8.33]).slice(0, -8) +
-                `<tr><td colspan="12" width="100%" style="width: 100%;">(1, 12)</td></tr></table>`,
+                `<tr><td colspan="1" width="8.33%" style="width: 8.33%;">(1, 12)</td>` +
+                `<td colspan="11" width="91.67%" style="width: 91.67%;"></td></tr></table>`, // 13 overflowed the row by 1 -> fill up
             "should have converted a 2x[1,13] grid to an equivalent table (overflowing)");
 
         // 3x[1,13,6]
@@ -130,7 +133,8 @@ QUnit.module('convert_inline', {}, function () {
         convertInline.bootstrapToTable($editable);
         assert.strictEqual($editable.html(),
             getRegularTableHtml(2, [1, 12], [12, 1], [100, 8.33]).slice(0, -8) +
-                `<tr><td colspan="12" width="100%" style="width: 100%;">(1, 12)</td></tr>` +
+                `<tr><td colspan="1" width="8.33%" style="width: 8.33%;">(1, 12)</td>` +
+                `<td colspan="11" width="91.67%" style="width: 91.67%;"></td></tr>` + // 13 overflowed the row by 1 -> fill up
                 getRegularTableHtml(1, 6, 2, 16.67).replace(/\(0,/g, `(2,`).replace(/^<table[^<]*>/, ''),
             "should have converted a 3x[1,13,6] grid to an equivalent table (overflowing)");
 
@@ -139,14 +143,16 @@ QUnit.module('convert_inline', {}, function () {
         convertInline.bootstrapToTable($editable);
         assert.strictEqual($editable.html(),
             getRegularTableHtml(3, [1, 6, 12], [12, 2, 1], [100, 16.67, 8.33]).slice(0, -8) +
-                `<tr><td colspan="12" width="100%" style="width: 100%;">(2, 12)</td></tr></table>`,
+                `<tr><td colspan="1" width="8.33%" style="width: 8.33%;">(2, 12)</td>` +
+                `<td colspan="11" width="91.67%" style="width: 91.67%;"></td></tr>` + // 13 overflowed the row by 1 -> fill up
+                `</table>`,
             "should have converted a 3x[1,6,13] grid to an equivalent table (overflowing)");
     });
     QUnit.test('convert a single-row irregular grid', async function (assert) {assert.expect(4);
         assert.expect(2);
 
         // 1x2
-        $editable = $(`<div>${getGridHtml([[8, 4]])}</div>`);
+        let $editable = $(`<div>${getGridHtml([[8, 4]])}</div>`);
         convertInline.bootstrapToTable($editable);
         assert.strictEqual($editable.html(), getTableHtml([[[8, 66.67], [4, 33.33]]]),
             "should have converted a 1x2 irregular grid to an equivalent table");
@@ -161,7 +167,7 @@ QUnit.module('convert_inline', {}, function () {
         assert.expect(2);
 
         // 1x2
-        $editable = $(`<div>${getGridHtml([[8, 5]])}</div>`);
+        let $editable = $(`<div>${getGridHtml([[8, 5]])}</div>`);
         convertInline.bootstrapToTable($editable);
         assert.strictEqual($editable.html(), getTableHtml([
                 [[8, 66.67], [4, 33.33, '']],
@@ -183,7 +189,7 @@ QUnit.module('convert_inline', {}, function () {
         assert.expect(2);
 
         // 2x2
-        $editable = $(`<div>${getGridHtml([[1, 11], [2, 10]])}</div>`);
+        let $editable = $(`<div>${getGridHtml([[1, 11], [2, 10]])}</div>`);
         convertInline.bootstrapToTable($editable);
         assert.strictEqual($editable.html(), getTableHtml([[[1, 8.33], [11, 91.67]], [[2, 16.67], [10, 83.33]]]),
             "should have converted a 2x2 irregular grid to an equivalent table");
@@ -198,7 +204,7 @@ QUnit.module('convert_inline', {}, function () {
         assert.expect(3);
 
         // 2x2 (both rows overflow)
-        $editable = $(`<div>${getGridHtml([[6, 8], [7, 9]])}</div>`);
+        let $editable = $(`<div>${getGridHtml([[6, 8], [7, 9]])}</div>`);
         convertInline.bootstrapToTable($editable);
         assert.strictEqual($editable.html(),
             getTableHtml([
@@ -234,8 +240,8 @@ QUnit.module('convert_inline', {}, function () {
     QUnit.test('convert a card to a table', async function (assert) {
         assert.expect(1);
 
-        $editable.html(
-            `<div class="card">` +
+        const $editable = $(
+            `<div><div class="card">` +
                 `<div class="card-header">` +
                     `<span>HEADER</span>` +
                 `</div>` +
@@ -246,7 +252,7 @@ QUnit.module('convert_inline', {}, function () {
                 `<div class="card-footer">` +
                     `<a href="#" class="btn">FOOTER</a>` +
                 `</div>` +
-            `</div>`);
+            `</div></div>`);
         convertInline.cardToTable($editable);
         assert.strictEqual($editable.html(),
             getRegularTableHtml(3, 1, 12, 100)
@@ -277,8 +283,8 @@ QUnit.module('convert_inline', {}, function () {
     QUnit.test('convert a list group to a table', async function (assert) {
         assert.expect(1);
 
-        $editable.html(
-            `<ul class="list-group list-group-flush">` +
+        const $editable = $(
+            `<div><ul class="list-group list-group-flush">` +
                 `<li class="list-group-item">` +
                     `<strong>(0, 0)</strong>` +
                 `</li>` +
@@ -289,7 +295,7 @@ QUnit.module('convert_inline', {}, function () {
                 `<li class="list-group-item">` +
                     `<strong class="b">(2, 0)</strong>` +
                 `</li>` +
-            `</ul>`);
+            `</ul></div>`);
         convertInline.listGroupToTable($editable);
         assert.strictEqual($editable.html(),
             getRegularTableHtml(3, 1, 12, 100)
@@ -299,6 +305,24 @@ QUnit.module('convert_inline', {}, function () {
                 .replace(/<tr><td[^>]*>(\(2, 0\))<\/td>/, '<img><tr><td><strong class="b">$1</strong></td>'),
             "should have converted a list group structure into a table");
     });
+    QUnit.test('convert a grid with offsets to a table', async function (assert) {
+        assert.expect(2);
+
+        let $editable = $('<div><div class="container"><div class="row"><div class="col-6 offset-4">(0, 0)</div></div></div>');
+        convertInline.bootstrapToTable($editable);
+        assert.strictEqual($editable.html(),
+            getTableHtml([[[4, 33.33, ''], [6, 50, '(0, 0)'], [2, 16.67, '']]]),
+            "should have converted a column with an offset to two columns, then completed the column");
+
+        $editable = $('<div><div class="container"><div class="row"><div class="col-6 offset-4">(0, 0)</div><div class="col-6 offset-1">(0, 1)</div></div></div>');
+        convertInline.bootstrapToTable($editable);
+        assert.strictEqual($editable.html(),
+            getTableHtml([
+                [[4, 33.33, ''], [6, 50, '(0, 0)'], [1, 8.33, ''], [1, 8.33, '']],
+                [[6, 50, '(0, 1)'], [6, 50, '']],
+            ]),
+            "should have converted a column with an offset to two columns, then completed the column (overflowing)");
+    });
 
     QUnit.module('Normalize styles');
     // Test normalizeColors, normalizeRem and formatTables
@@ -306,12 +330,12 @@ QUnit.module('convert_inline', {}, function () {
     QUnit.test('convert rgb color to hexadecimal', async function (assert) {
         assert.expect(1);
 
-        $editable.html(
-            `<div style="color: rgb(0, 0, 0);">` +
+        const $editable = $(
+            `<div><div style="color: rgb(0, 0, 0);">` +
                 `<div class="a" style="padding: 0; background-color:rgb(255,255,255)" width="100%">` +
                     `<p style="border: 1px rgb(50, 100,200 ) solid; color: rgb(35, 134, 54);">Test</p>` +
                 `</div>` +
-            `</div>`
+            `</div></div>`
         );
         convertInline.normalizeColors($editable);
         assert.strictEqual($editable.html(),
@@ -332,24 +356,22 @@ QUnit.module('convert_inline', {}, function () {
             `</div>` +
         `</div>`;
 
-        $editable = $(`<div>${testDom}</div>`);
+        let $editable = $(`<div>${testDom}</div>`);
         document.body.append($editable[0]);
         convertInline.normalizeRem($editable);
         assert.strictEqual($editable.html(),
-            `<div style="font-size: 24px;">` +
-                `<div class="a" style="color: #000000; padding: 30px" width="100%">` +
-                    `<p style="border: 14.4px #aaaaaa solid; margin: 45.48px;">Test</p>` +
+            `<div style="font-size: 32px;">` +
+                `<div class="a" style="color: #000000; padding: 40px" width="100%">` +
+                    `<p style="border: 19.2px #aaaaaa solid; margin: 60.64px;">Test</p>` +
                 `</div>` +
             `</div>`,
             "should have converted several rem sizes to px using the default rem size"
         );
         $editable.remove();
 
-        const html = document.createElement('html');
-        html.style.setProperty('font-size', '20px');
         $editable = $(`<div>${testDom}</div>`);
-        html.append($editable[0]);
-        convertInline.normalizeRem($editable);
+        document.body.append($editable[0]);
+        convertInline.normalizeRem($editable, 20);
         assert.strictEqual($editable.html(),
             `<div style="font-size: 40px;">` +
                 `<div class="a" style="color: #000000; padding: 50px" width="100%">` +
@@ -430,7 +452,7 @@ QUnit.module('convert_inline', {}, function () {
         `</table>`;
 
         // table.o_mail_snippet_general
-        $editable = $(`<div>${testTable}</div>`);
+        const $editable = $(`<div>${testTable}</div>`);
         convertInline.formatTables($editable);
         assert.strictEqual($editable.html(), expectedTable,
             "should have moved the padding from table.o_mail_snippet_general and table in it to their respective cells"
@@ -439,7 +461,7 @@ QUnit.module('convert_inline', {}, function () {
     QUnit.test('add a tbody to any table that doesn\'t have one', async function (assert) {
         assert.expect(1);
 
-        $editable = $(`<div>${`<table><tr><td>I don't have a body :'(</td></tr></table>`}</div>`);
+        const $editable = $(`<div>${`<table><tr><td>I don't have a body :'(</td></tr></table>`}</div>`);
         $editable.find('tr').unwrap();
         convertInline.formatTables($editable);
         assert.strictEqual($editable.html(), `<table><tbody style="vertical-align: top;"><tr><td>I don't have a body :'(</td></tr></tbody></table>`,
@@ -449,7 +471,7 @@ QUnit.module('convert_inline', {}, function () {
     QUnit.test('add number heights to parents of elements with percent heights', async function (assert) {
         assert.expect(3);
 
-        $editable = $(`<div>${`<table><tbody><tr style="height: 100%;"><td>yup</td></tr></tbody></table>`}</div>`);
+        let $editable = $(`<div>${`<table><tbody><tr style="height: 100%;"><td>yup</td></tr></tbody></table>`}</div>`);
         convertInline.formatTables($editable);
         assert.strictEqual($editable.html(), `<table><tbody style="height: 0px;"><tr style="height: 100%;"><td>yup</td></tr></tbody></table>`,
             "should have added a 0 height to the parent of a 100% height element"
@@ -470,7 +492,7 @@ QUnit.module('convert_inline', {}, function () {
     QUnit.test('express align-self with vertical-align on table cells', async function (assert) {
         assert.expect(3);
 
-        $editable = $(`<div><table><tbody><tr><td style="align-self: start;">yup</td></tr></tbody></table></div>`);
+        let $editable = $(`<div><table><tbody><tr><td style="align-self: start;">yup</td></tr></tbody></table></div>`);
         convertInline.formatTables($editable);
         assert.strictEqual($editable.html(), `<table><tbody><tr><td style="align-self: start; vertical-align: top;">yup</td></tr></tbody></table>`,
             "should have added a top vertical alignment"
@@ -495,10 +517,10 @@ QUnit.module('convert_inline', {}, function () {
     QUnit.test('convert snippets to tables', async function (assert) {
         assert.expect(2);
 
-        $editable.html(
-            `<div class="o_mail_snippet_general">` +
+        let $editable = $(
+            `<div><div class="o_mail_snippet_general">` +
                 `<div>Snippet</div>` +
-            `</div>`
+            `</div></div>`
         );
         convertInline.addTables($editable);
         assert.strictEqual($editable.html(),
@@ -508,10 +530,10 @@ QUnit.module('convert_inline', {}, function () {
             "should have converted .o_mail_snippet_general to a special table structure with a table in it"
         );
 
-        $editable.html(
-            `<div class="o_mail_snippet_general">` +
+        $editable = $(
+            `<div><div class="o_mail_snippet_general">` +
                 `<table><tbody><tr><td>Snippet</td></tr></tbody></table>` +
-            `</div>`
+            `</div></div>`
         );
         convertInline.addTables($editable);
         assert.strictEqual($editable.html(),
@@ -524,10 +546,10 @@ QUnit.module('convert_inline', {}, function () {
     QUnit.test('convert mailing bodies to tables', async function (assert) {
         assert.expect(2);
 
-        $editable.html(
-            `<div class="o_layout">` +
+        let $editable = $(
+            `<div><div class="o_layout">` +
                 `<div>Mailing</div>` +
-            `</div>`
+            `</div></div>`
         );
         convertInline.addTables($editable);
         assert.strictEqual($editable.html(),
@@ -538,10 +560,10 @@ QUnit.module('convert_inline', {}, function () {
             "should have converted .o_layout to a special table structure with a table in it"
         );
 
-        $editable.html(
-            `<div class="o_layout">` +
+        $editable = $(
+            `<div><div class="o_layout">` +
                 `<table><tbody><tr><td>Mailing</td></tr></tbody></table>` +
-            `</div>`
+            `</div></div>`
         );
         convertInline.addTables($editable);
         assert.strictEqual($editable.html(),
@@ -559,7 +581,7 @@ QUnit.module('convert_inline', {}, function () {
     QUnit.test('convert Bootstrap classes to inline styles', async function (assert) {
         assert.expect(1);
 
-        $editable = $(`<div>${`<div class="container"><div class="row"><div class="col">Hello</div></div></div>`}</div>`);
+        const $editable = $(`<div><div class="container"><div class="row"><div class="col">Hello</div></div></div></div>`);
         convertInline.classToStyle($editable, convertInline.getCSSRules($editable[0].ownerDocument));
         const containerStyle = `padding:0 16px 0 16px;margin:0 auto 0 auto;box-sizing:border-box;max-width:1140px;width:100%;`;
         const rowStyle = `margin:0 -16px 0 -16px;box-sizing:border-box;`;
@@ -587,7 +609,7 @@ QUnit.module('convert_inline', {}, function () {
                 border-top-left-radius: 40%;
             }
         `, 0);
-        $editable = $(`<div>${`<div class="test-border-radius"></div>`}</div>`);
+        let $editable = $(`<div>${`<div class="test-border-radius"></div>`}</div>`);
         convertInline.classToStyle($editable, convertInline.getCSSRules($editable[0].ownerDocument));
         assert.strictEqual($editable.html(),
             `<div class="test-border-radius" style="border-radius:30%;box-sizing:border-box;"></div>`,
@@ -784,7 +806,7 @@ QUnit.module('convert_inline', {}, function () {
                 text-decoration-thickness: 10px;
             }
         `, 0);
-        $editable = $(`<div>${`<div class="test-decoration"></div>`}</div>`);
+        let $editable = $(`<div>${`<div class="test-decoration"></div>`}</div>`);
         convertInline.classToStyle($editable, convertInline.getCSSRules($editable[0].ownerDocument));
         assert.strictEqual($editable.html(),
             `<div class="test-decoration" style="text-decoration:underline;box-sizing:border-box;"></div>`,
@@ -960,19 +982,19 @@ QUnit.module('convert_inline', {}, function () {
             }
         `, 2);
 
-        $editable = $(`<div>${`<span class="test-color"></span>`}</div>`);
+        let $editable = $(`<div><span class="test-color"></span></div>`);
         convertInline.classToStyle($editable, convertInline.getCSSRules($editable[0].ownerDocument));
         assert.strictEqual($editable.html(),
             `<span class="test-color" style="box-sizing:border-box;color:blue;"></span>`,
             "should have prioritized the last defined style");
 
-        $editable = $(`<div>${`<div class="test-color"></div>`}</div>`);
+        $editable = $(`<div><div class="test-color"></div></div>`);
         convertInline.classToStyle($editable, convertInline.getCSSRules($editable[0].ownerDocument));
         assert.strictEqual($editable.html(),
             `<div class="test-color" style="box-sizing:border-box;color:green;"></div>`,
             "should have prioritized the more specific style");
 
-        $editable = $(`<div>${`<div class="test-color" style="color: yellow;"></div>`}</div>`);
+        $editable = $(`<div><div class="test-color" style="color: yellow;"></div></div>`);
         convertInline.classToStyle($editable, convertInline.getCSSRules($editable[0].ownerDocument));
         assert.strictEqual($editable.html(),
             `<div class="test-color" style="box-sizing:border-box;color: yellow;"></div>`,
@@ -983,7 +1005,7 @@ QUnit.module('convert_inline', {}, function () {
                 color: black !important;
             }
         `, 0);
-        $editable = $(`<div>${`<div class="test-color"></div>`}</div>`);
+        $editable = $(`<div><div class="test-color"></div></div>`);
         convertInline.classToStyle($editable, convertInline.getCSSRules($editable[0].ownerDocument));
         assert.strictEqual($editable.html(),
             `<div class="test-color" style="box-sizing:border-box;color:black;"></div>`,

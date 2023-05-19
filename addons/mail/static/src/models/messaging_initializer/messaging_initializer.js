@@ -39,14 +39,10 @@ function factory(dependencies) {
             });
             const device = this.messaging.device;
             device.start();
-            const discuss = this.messaging.discuss;
             const data = await this.async(() => this.env.services.rpc({
                 route: '/mail/init_messaging',
             }, { shadow: true }));
             await this.async(() => this._init(data));
-            if (discuss.isOpen) {
-                discuss.openInitThread();
-            }
             if (this.messaging.autofetchPartnerImStatus) {
                 this.messaging.models['mail.partner'].startLoopFetchImStatus();
             }
@@ -189,7 +185,7 @@ function factory(dependencies) {
                         name: "leave",
                     },
                     {
-                        channel_types: ['channel', 'chat'],
+                        channel_types: ['channel', 'chat', 'group'],
                         help: this.env._t("List users in the current channel"),
                         methodName: 'execute_command_who',
                         name: "who",
@@ -306,7 +302,6 @@ function factory(dependencies) {
             }
             if (current_partner) {
                 const partnerData = this.messaging.models['mail.partner'].convertData(current_partner);
-                partnerData.user = insert({ id: currentUserId });
                 this.messaging.update({
                     currentPartner: insert(partnerData),
                     currentUser: insert({ id: currentUserId }),
